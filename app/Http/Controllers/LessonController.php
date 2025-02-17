@@ -18,7 +18,7 @@ class LessonController extends Controller
     {
         // Fetch course with lessons
         $course = Course::with('lessons')->findOrFail($courseId);
-    
+
         // Transform the lessons for DataTables
         $lessons = $course->lessons->map(function ($lesson) {
             return [
@@ -28,7 +28,7 @@ class LessonController extends Controller
                 'video_url' => $lesson->video_url,
             ];
         });
-    
+
         // Return JSON response for DataTables
         return response()->json([
             'draw' => request()->get('draw'), // DataTables draw counter
@@ -37,7 +37,7 @@ class LessonController extends Controller
             'data' => $lessons,
         ]);
     }
-    
+
 
 
     public function show($courseId)
@@ -75,6 +75,63 @@ class LessonController extends Controller
             'data' => $lesson,
             'message' => 'Lesson created successfully',
             'status_code' => 201,
+        ]);
+    }
+    public function update(Request $request, $lessonId)
+    {
+        $lesson = Lesson::find($lessonId);
+        if (!$lesson) {
+            return response()->json([
+                'message' => 'Lesson not found',
+                'status_code' => 404,
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'title' => 'sometimes|string',
+            'order' => 'sometimes|integer',
+            'video' => 'sometimes|file|mimes:mp4,mkv,avi'
+        ]);
+
+        // Handle video upload
+        if ($request->hasFile('video')) {
+            // Delete old video if it exists
+            if ($lesson->video_url) {
+                Storage::disk('public')->delete($lesson->video_url);
+            }
+            // Store new video
+            $videoPath = $request->file('video')->store('videos', 'public');
+            $lesson->video_url = $videoPath;
+        }
+
+        // Only update fields that are present in the request
+        $updateData = [];
+        if ($request->has('title')) {
+            $updateData['title'] = $validated['title'];
+        }
+        if ($request->has('order')) {
+            $updateData['order'] = $validated['order'];
+        }
+        if ($request->hasFile('video')) {
+            $updateData['video_url'] = $lesson->video_url;
+        }
+
+        $lesson->update($updateData);
+
+        return response()->json([
+            'message' => 'Lesson updated successfully',
+            'status_code' => 200,
+        ]);
+    }
+    public function delete( $lessonId){
+        $lesson = Lesson::find($lessonId);
+        if ($lesson->video_url) {
+            Storage::disk('public')->delete($lesson->video_url);
+        }
+         $lesson->delete();
+        return response()->json([
+           'message' => 'Lesson deleted successfully',
+           'status_code' => 200,
         ]);
     }
 }

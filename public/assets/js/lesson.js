@@ -6,19 +6,19 @@ $(document).ready(function () {
     $('#lessonsTable').DataTable({
         processing: true,
         serverSide: true,
-        ajax: `/admin/courses/lessons-table/${courseId}`, 
+        ajax: `/admin/courses/lessons-table/${courseId}`,
         columns: [
             { data: 'id', title: 'ID' },
             { data: 'title', title: 'Lesson Title' },
             { data: 'order', title: 'Order' },
-            { 
+            {
                 data: 'video_url',
                 title: 'Video',
                 render: function (data, type, row) {
-                    return `<a href="${data}" target="_blank" class="btn btn-sm btn-primary">View Video</a>`;
+                    return `<a href="/storage/${data}" target="_blank" class="btn btn-sm btn-primary">View Video</a>`;
                 }
             },
-            { 
+            {
                 data: null,
                 title: 'Actions',
                 orderable: false,
@@ -32,7 +32,7 @@ $(document).ready(function () {
             },
         ],
     });
-    
+
     //Handle Add Button Click
     $('#savelesson').on('click', function(event) {
         event.preventDefault();
@@ -45,7 +45,7 @@ $(document).ready(function () {
         formData.append('order', order);
         formData.append('video', videoFile); // Append the file here
 
-        
+
         $.ajax({
             url: `/admin/courses/add-lesson/${courseId}`,
             method: 'POST',
@@ -57,7 +57,7 @@ $(document).ready(function () {
             data: formData,
             success: function(response) {
                 alert('Lesson added successfully');
-                $('#addModal').modal('hide');
+                $('#lessonModal').modal('hide');
                 $('#lessonsTable').DataTable().ajax.reload();
             },
             error: function(xhr) {
@@ -70,35 +70,76 @@ $(document).ready(function () {
                 }
             }
         });
-        
-        
+
+
     });
-    
-    // Handle Edit Form Submit
+
 
     // Handle Edit Button Click
     $('#lessonsTable').on('click', '.edit-btn', function() {
         const lessonId = $(this).data('id');
         const title = $(this).data('title');
         const order = $(this).data('order');
-        const video = $(this).data('video');
-    
-        // Open your edit modal or populate form fields for editing
+        console.log(title);
+
+
         $('#editModal').modal('show');
+        $('#edit-lesson-id').val(lessonId);
         $('#edit-title').val(title);
         $('#edit-order').val(order);
-        $('#edit-video-url').val(video);
-        $('#edit-form').attr('action', `/admin/courses/lessons/${lessonId}`);
+
     });
-    
+    // Handle Edit Form Submit
+    $('#editLesson').on('click', function(event) {
+        event.preventDefault();
+        const lessonId = $('#edit-lesson-id').val();
+        const title = $('#edit-title').val();
+        const order = $('#edit-order').val();
+        const videoFile = $('#edit-video-url')[0]?.files[0];
+        const formData = new FormData();
+
+        if (title) formData.append('title', title);
+        if (order) formData.append('order', order);
+        if (videoFile) formData.append('video', videoFile);
+
+        $.ajax({
+            url: `/admin/courses/update-lesson/${lessonId}`,
+            method: 'POST',
+            contentType: false,
+            processData: false,
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            data: formData,
+            success: function(response) {
+                alert(response.message);
+                $('#editModal').modal('hide');
+                $('#lessonsTable').DataTable().ajax.reload();
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                const errors = xhr.responseJSON?.errors;
+                if (errors) {
+                    alert(Object.values(errors).flat().join('\n'));
+                } else {
+                    alert('An error occurred while editing the lesson');
+                }
+            }
+        });
+    });
+
+
     // Handle Delete Button Click
     $('#lessonsTable').on('click', '.delete-btn', function() {
         const lessonId = $(this).data('id');
-    
+
         if (confirm('Are you sure you want to delete this lesson?')) {
             $.ajax({
-                url: `/admin/courses/lessons/${lessonId}`,
+                url: `/admin/courses/delete-lesson/${lessonId}`,
                 method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken // Include CSRF token
+                },
                 success: function(response) {
                     alert('Lesson deleted successfully');
                     $('#lessonsTable').DataTable().ajax.reload();
@@ -110,7 +151,7 @@ $(document).ready(function () {
             });
         }
     });
-    
+
 });
 
 

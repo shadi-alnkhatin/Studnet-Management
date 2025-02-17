@@ -7,62 +7,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\LessonController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-
-// Route::get('/', function () {
-//     return view('user.welcome');
-// });
-
-// Route::get('/dashboard', [UserController::class,'userInfo'])->middleware(['auth', 'verified'])->name('dashboard');
-// Route::post('/logout', function () {
-//     Auth::logout();
-//     return redirect('/');
-// })->name('logout');
-// Route::middleware('auth')->group(function () {
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-//     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
-//     Route::get('/chat/messages/{id}', [ChatController::class, 'fetchMessages']);
-//     Route::post('/chat/send', [ChatController::class, 'sendMessage']);
-// });
-
-// Route::middleware(['role:admin'])->group(function () {
-//     Route::get('/index', [UserController::class,'admin_statistics'])->name('index');
-//     Route::get('/users', function () {
-//         return view('students');
-//     })->name('users.index');
-//     Route::get('/users/all',[UserController::class,'index']);
-//     Route::get('/user/details/{id}',[UserController::class,'details'])->name('users.details');
-
-//     Route::post('/create/user',[UserController::class,'create'])->name('users.create');
-//     Route::put('/edit/user/{id}',[UserController::class,'edit'])->name('users.edit');
-//     Route::delete('/delete/user/{id}',[UserController::class,'delete'])->name('users.delete');
-
-//     Route::get('/courses', function () {
-//         return view('courses');
-//     })->name('courses.index');
-//     Route::get('/courses/all',[CoursesController::class,'index']);
-//     Route::get('/courses/all/{id}',[CoursesController::class,'getCourses'])->name('courses.get');
-
-//     Route::get('/course/details/{id}',[CoursesController::class,'details'])->name('course.details');
-
-//     Route::post('/create/course',[CoursesController::class,'create'])->name('course.create');
-//     Route::put('/edit/course/{id}',[CoursesController::class,'edit'])->name('course.edit');
-//     Route::delete('/delete/course/{id}',[CoursesController::class,'delete'])->name('course.delete');
-//     Route::post('/course/set-mark/{userId}',[CoursesController::class,'setMark'])->name('course.setMark');
-
-
-// });
-// Route::put('/edit/user/{id}',[UserController::class,'edit'])->name('users.edit')->withoutMiddleware(VerifyCsrfToken::class);;
-
-// Route::post('/create/course',[CoursesController::class,'create'])->name('course.create')->withoutMiddleware(VerifyCsrfToken::class);
-// Route::post('/manage-courses/{id}', [CoursesController::class, 'manageCourses'])->name('assign.course')->withoutMiddleware(VerifyCsrfToken::class);
-
-
-
-
-
+use Illuminate\Support\Facades\Auth;
 
 // Public Routes
 Route::get('/', function () {
@@ -128,7 +73,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             Route::get('/lessons-table/{courseId}', [LessonController::class, 'showToAdmin'])->name('AdminLessonsTable');
 
             Route::post('/add-lesson/{courseId}', [LessonController::class, 'store'])->name('lesson-store');
-
+            Route::delete('/delete-lesson/{lessonId}', [LessonController::class,'delete'])->name('lesson-delete');
+            Route::post('/update-lesson/{lessonId}', [LessonController::class,'update'])->name('lesson-update');
      });
 });
 

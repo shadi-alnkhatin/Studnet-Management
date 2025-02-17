@@ -12,10 +12,10 @@
         <!-- Sidebar for Lessons -->
         <div class="w-full md:w-2/4">
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold mb-4">Lessons</h2>
+                <h2  class="text-xl font-semibold mb-4 title">Lessons</h2>
                 <ul class="space-y-2">
-                    @foreach ($course->lessons as $lesson)
-                        <li class="p-3 rounded-lg hover:bg-gray-100 transition duration-200 cursor-pointer lesson-item" data-video="{{ asset('storage/' . $lesson->video_url) }}">
+                    @forelse ($course->lessons as $lesson)
+                        <li class="p-3 rounded-lg hover:bg-gray-100 transition duration-200 cursor-pointer lesson-item" data-video="{{ asset('storage/' . $lesson->video_url) }} " data-title="{{$lesson->title}}">
                             <div class="flex justify-between items-center">
                                 <a href="#" class="text-blue-600 hover:text-blue-800 lesson-link">
                                     {{ $lesson->title }}
@@ -23,7 +23,9 @@
                                 <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full">Lesson {{ $lesson->order }}</span>
                             </div>
                         </li>
-                    @endforeach
+                        @empty
+                     <p>No lessons available.</p>
+                    @endforelse
                 </ul>
             </div>
         </div>
@@ -31,7 +33,7 @@
         <!-- Main Content Area for Video -->
         <div class="w-full md:w-3/4">
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold mb-4">Lesson Video</h2>
+                <h2  class="text-xl font-semibold mb-4 title">Lesson Video</h2>
                 <div id="video-container" class="bg-gray-50 rounded-lg p-4">
                     <p class="text-gray-500">Select a lesson to start watching.</p>
                 </div>
@@ -53,6 +55,11 @@
 
                 // Get the video URL from the data attribute
                 const videoUrl = item.getAttribute('data-video');
+                const title = item.getAttribute('data-title');
+                document.querySelectorAll('.title').forEach(element => {
+                        element.innerText = title;
+                });
+
 
                 // Update the video container with the selected video
                 videoContainer.innerHTML = `
